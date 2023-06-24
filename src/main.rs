@@ -1,5 +1,6 @@
 use text_colorizer::*;
 use std::env;
+use std::fs;
 
 #[derive(Debug)]
 struct Arguments{
@@ -12,7 +13,27 @@ struct Arguments{
 
 
 fn main() {
-    println!("Hello, world!");
+    let args = parse_args();
+
+    let data = match fs::read_to_string(&args.filename) {
+        Ok(v) => v,
+        Err(e) => {
+            eprintln!("{}: failed to read from file '{}': {:?}",
+                "Error:".red().bold(), args.filename, e
+            );
+            std::process::exit(1);
+        }
+    };
+
+    match fs::write(&args.output, &data){
+        Ok(_) => {},
+        Err(e) => {
+            eprintln!("{} failed to write to file '{}': {:?}",
+                "Error:".red().bold(), args.filename, e);
+            std::process::exit(1);
+        }
+    }
+    // println!("{:?}", args);
 }
 
 
@@ -28,7 +49,7 @@ fn parse_args() -> Arguments{
     if args.len() != 4{
         print_usage();
         eprintln!("{} wrong number of arguments: expected 4, got {}.",
-        "Error:".red(), args.len());
+        "Error:".red().bold(), args.len());
         std::process::exit(1);
     }
 
